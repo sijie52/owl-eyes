@@ -54,8 +54,9 @@ install.sh 会自动：检查/安装 Pillow、装命令、配置 Claude Code（�
 
 1. 打开 https://modelscope.cn 注册/登录（手机号即可）
 2. 访问 https://modelscope.cn/my/myaccesstoken
-3. **必须绑定阿里云账号**（用支付宝/淘宝扫码最快）——不绑定会报
-   `Please bind your Alibaba Cloud account before use`，这是最常见的坑
+3. **必须绑定阿里云账号**（页面会引导你完成绑定，按提示操作即可）——
+   不绑定会报 `Please bind your Alibaba Cloud account before use`，
+   这是最常见的坑
 4. 新建访问令牌，复制（`ms-` 开头的格式）
 
 ### 3. 填配置
