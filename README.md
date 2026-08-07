@@ -1,8 +1,13 @@
-# owl-eyes
+# owl-eyes 🦉
 
 给 DeepSeek 加视觉的本地代理。
 
 DeepSeek 官方 API 是纯文本模型，在 Claude Code 里贴图它看不到内容，还会瞎编。owl-eyes 在中间加一层：图片先转成文字描述，再喂给 DeepSeek。它就能看图了。
+
+- 🆓 视觉走 ModelScope 免费额度，零成本
+- ⚡ 纯 Python 标准库，无 Docker 无框架
+- 🤖 开 claude 自动起代理，退出自动停
+- 📐 数学题截图转 LaTeX，不是模糊描述
 
 ## 原理
 
