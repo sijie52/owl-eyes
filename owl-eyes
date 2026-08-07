@@ -1,0 +1,67 @@
+#!/bin/bash
+# owl-eyes 命令：管理本地视觉代理
+# 用法: owl-eyes {start|stop|status|setup|proxy|logs}
+# 自动定位项目目录（支持从任意位置克隆）
+
+PROXY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PID_FILE="/tmp/owl-eyes.pid"
+LOG_FILE="/tmp/owl-eyes.log"
+
+is_running() {
+    [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null
+}
+
+case "$1" in
+    start)
+        if is_running; then
+            echo "owl-eyes 已在运行 (pid $(cat "$PID_FILE"))"
+        else
+            cd "$PROXY_DIR" || { echo "项目目录不存在: $PROXY_DIR"; exit 1; }
+            nohup python3 proxy.py >> "$LOG_FILE" 2>&1 &
+            echo $! > "$PID_FILE"
+            sleep 1.5
+            if is_running; then
+                echo "owl-eyes 已启动 (pid $(cat "$PID_FILE"))"
+                echo "日志: $LOG_FILE"
+                curl -s -m 3 http://127.0.0.1:8788/health > /dev/null && echo "健康检查: OK" || echo "健康检查: 失败（看日志）"
+            else
+                echo "启动失败，看日志: $LOG_FILE"
+                tail -5 "$LOG_FILE"
+            fi
+        fi
+        ;;
+    stop)
+        if is_running; then
+            kill "$(cat "$PID_FILE")" 2>/dev/null
+            rm -f "$PID_FILE"
+            echo "owl-eyes 已停止"
+        else
+            echo "owl-eyes 未在运行"
+        fi
+        ;;
+    status)
+        if is_running; then
+            echo "运行中 (pid $(cat "$PID_FILE"))"
+            curl -s -m 3 http://127.0.0.1:8788/health && echo ""
+        else
+            echo "未运行"
+        fi
+        ;;
+    setup)
+        cd "$PROXY_DIR" || { echo "项目目录不存在: $PROXY_DIR"; exit 1; }
+        python3 -c "import config; print('配置文件:', config.ensure_config_file())"
+        echo "请编辑配置文件填入："
+        echo "  MODELSCOPE_KEY=你的ModelScope令牌（https://modelscope.cn/my/myaccesstoken）"
+        echo "  DEEPSEEK_KEY=你的DeepSeek API key"
+        ;;
+    proxy)
+        cd "$PROXY_DIR" || exit 1
+        python3 proxy.py
+        ;;
+    logs)
+        tail -30 "$LOG_FILE" 2>/dev/null || echo "暂无日志"
+        ;;
+    *)
+        echo "用法: owl-eyes {start|stop|status|setup|proxy|logs}"
+        ;;
+esac
