@@ -24,8 +24,9 @@ echo "    OK"
 echo "==> 1/4 安装命令（同时装到 ~/.local/bin 和 ~/bin，兼容不同 PATH 配置）"
 for d in "$HOME/.local/bin" "$HOME/bin"; do
     mkdir -p "$d"
-    cp "$PROXY_DIR/owl-eyes" "$d/owl-eyes"
-    chmod +x "$d/owl-eyes"
+    # 用符号链接而非复制：脚本才能解析链接定位回项目目录、找到同目录的 proxy.py。
+    # 复制件会因 BASH_SOURCE 指向 PATH 目录（如 ~/.local/bin）而找不到 proxy.py。
+    ln -sf "$PROXY_DIR/owl-eyes" "$d/owl-eyes"
 done
 echo "    已安装: ~/.local/bin/owl-eyes + ~/bin/owl-eyes"
 

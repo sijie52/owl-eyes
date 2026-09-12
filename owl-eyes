@@ -1,9 +1,19 @@
 #!/bin/bash
 # owl-eyes 命令：管理本地视觉代理
 # 用法: owl-eyes {start|stop|status|setup|proxy|logs}
-# 自动定位项目目录（支持从任意位置克隆）
-
-PROXY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 自动定位项目目录（支持从任意位置克隆）。
+# install.sh 用符号链接把本脚本装到 PATH 目录，这里必须先解析符号链接再定位，
+# 否则 BASH_SOURCE 会指向 PATH 目录（如 ~/.local/bin），导致找不到 proxy.py。
+SCRIPT="${BASH_SOURCE[0]}"
+while [ -L "$SCRIPT" ]; do
+    DIR="$(cd -P "$(dirname "$SCRIPT")" && pwd)"
+    LINK="$(readlink "$SCRIPT")"
+    case "$LINK" in
+        /*) SCRIPT="$LINK" ;;
+        *)  SCRIPT="$DIR/$LINK" ;;
+    esac
+done
+PROXY_DIR="$(cd -P "$(dirname "$SCRIPT")" && pwd)"
 PID_FILE="/tmp/owl-eyes.pid"
 LOG_FILE="/tmp/owl-eyes.log"
 
